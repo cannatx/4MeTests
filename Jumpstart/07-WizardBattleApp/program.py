@@ -1,3 +1,7 @@
+# import actors
+from actors import Creature, Wizard
+
+
 def main():
     print_header()
     game_loop()
@@ -11,6 +15,18 @@ def print_header():
 
 
 def game_loop():
+    creatures = [
+        Creature(),
+        Creature(),
+        Creature(),
+        Creature(),
+        Creature(),
+        Creature(),
+        Creature(),
+        Creature(),
+    ]
+
+    hero = Wizard()
 
     while True:
 
@@ -25,6 +41,7 @@ def game_loop():
         else:
             print('OK, exiting the Game.... bye!')
             break
+
 
 if __name__ == '__main__':
     main()
