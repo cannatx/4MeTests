@@ -1,0 +1,464 @@
+ANSIBLE APUNTES
+---------------
+
+
+- Ansible Package fow SO
+
+
+#########################
+  SSH ID
+------------
+- ssh-keygen
+  ssh-copy-id -i .ssh/id_rsa.pub user@"dest_host"
+
+
+  #############
+  Sudo Escalation
+--------------
+- sudo visudo
+
+
+###################################################################
+  INVENTORY
+---------
+  /etc/ansible/hosts
+
+- Se pueden crear grupos con la etiquetas:
+
+  [gui]
+  host1
+  host1
+
+- o especificar el usuario
+  [nogui]
+  host3 ansible_user=administrator
+
+- Crear rangos
+  lab[0:4]
+  172.20.0.[10:16]
+
+  https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+
+---
+[firewall]
+  pfsense ansible_ssh_host=192.168.1.1 ansible_ssh_port=2222 ansible_ssh_user=root ansible_python_interpreter=/usr/local/bin/python
+  [nas]
+  qnap ansible_ssh_host=192.168.1.252 ansible_ssh_port=2222 ansible_ssh_user=admin ansible_ssh_pass=QNAPpassword
+  syno ansible_ssh_host=192.168.1.253 ansible_ssh_port=2222 ansible_ssh_user=root ansible_ssh_pass=SYNOpassword
+---
+
+
+################################################################
+MODULOS and Ad-Hoc
+------------------
+- Por defecto el módulo es "COMMAND". Se especifica con '-m' (no usa ni shell ni BASH por lo que no se pueden usar "pipes")
+
+  raw (no utiliza python envia comandos por ssh)
+  shell(puedes usar pipes)
+
+
+  ansible host/group -b (to be root) -m modulo -a (action)
+  ansible repo -b -m service -a 'name=apache2 state=Started' (arrancaría el servicio apache2 o devolvería información del estado si ya esta arrancado)
+
+Ejempplos:
+
+  ansible gui -b -m raw -a 'echo "hello" > /root/hello.txt'
+  ansible gui -b -m file -a 'path=/root/hello.txt state=absent' (remove because needs state 'absent')
+  ansible gui -b -m copy -a 'src=/etc/hosts dest=/etc/hosts' (copia de la maquina original a las de destino)
+
+
+
+
+  #################################################################
+  PLAYBOOKS
+---------
+
+
+  se escriben en yaml. Se utilizan los espacios para las secciones y los '-' para multiples elementos en una seccion
+
+- test.yaml:
+--- # Debe comenzar con 3 dashes
+
+- hosts: gui # Nombre del Host o del Grupo de Hosts
+  tasks:
+  - name: du a uname # Nombre de la tarea
+    shell: uname -a > /home/ng71cd8/Desktop/result.txt
+
+  - name: whoami
+    shell: whoami >> /home/ng71cd8/Desktop/result.txt
+
+
+  ansible-playbook -vvvv (nivel de verbosidad) -b (para ejecutarlo como root) test.yaml (para ejecutarlo)
+
+
+  #################################
+  PLAYBOOKS-HANDLERS
+------------------
+
+  Son tareas que se pueden llamar cuando otra tarea se ha ejecutado y ha realizado algún cambio
+
+
+- test.yaml:
+---
+
+- hosts: gui
+  become: yes # yes o True. Para forzar a que se ejecute como root
+  tasks:
+  - name: install vsftpd on ubuntu
+    apt: name=vftpd update_cache=yes state=latest # modulo aptitude para instalar aplicaciones en Ubuntu
+    ignore_errors: yes # (si no lo ponemos y hay un error se detiene la ejecución del playbook)
+    notify: start vsftpd #  -- este es el handler --
+
+  - name: install vsftpd on CentOS
+    yum: name=vsftpd state=latest
+    ignore_errors: yes
+    notify: start vsftpd
+
+  handlers:
+  - name: start vsftpd # tiene que ser el mismo invocado en notiify
+    service: name=vsftpd enabled=yes state=started
+
+
+
+####################################
+  9 - PLAYBOOKS-VARIABLES
+-----------------------
+Las variables se pueden invocar desde el playbook con: {{ }}
+
+  FACTS
+  Son variables especiales que se definen durante la ejecución de un playbook (CPU Type, OS Family, RAM, IP address, etc)
+
+  ansible host -m setup # desvuelve las variables disponibles para ese host
+  ansible ubuntu -m setup -a "filter=*family*" # para filtrar
+
+
+  test.yaml
+---
+
+- hosts: ubuntu
+  vars:
+  - var1: cool stuff here
+  - var2: cool stuff there
+
+  tasks:
+  - name: echo stuff
+    shell: echo " {{ var1 }} is var1, but var2 is {{ var2 }} " > /home/nugget1/Desktop/{{ ansible_os_family }}.txt
+
+
+
+######################################
+  10 - DEBUG MODULE
+------------------
+Para no tener que ver el resdultado en la pantalla o crear ficheros en cada host.
+
+
+test.taml
+---
+
+- hosts: centos
+  vars:
+  - var_thing: "never gonna"
+
+  tasks:
+  - name: show results
+    debug: msg="the variable var_thing is set to - {{ var_thing }}"
+
+
+
+
+  test.taml # En este vamos a enviar los resultados a otra variable  para luego mostrarla por la pantalla
+---
+
+- hosts: centos
+  vars:
+  - var_thing: "never gonna"
+
+  tasks:
+  - name: echo stuff
+    command: echo -e "{{ var_thing }} give you up,\n{{ var_thing }} let you down,\n{{ var_thing }} run around and dessert you"
+    register: results # aqui definimos la variable con los resultados
+
+  - name: show results
+    debug: msg={{ results }} # msg={{ results.stdout_lines }} muestra solo una de las subvariables disponibles para el debug
+
+
+
+########################################
+  11 - CONDICIONALES
+------------------
+Se utiliza when en lugar de if
+
+
+test.yaml
+---
+
+- hosts: gui
+  become:  yes
+
+  tasks:
+  - name: install apache2
+    apt: name=apache2 state=latest
+    ignore_errors: yes
+    register: results
+
+  - name: install httpd
+    yum: name=httpd state=latest
+    when: results|failed # Le estamos diciendo que se ejecutara solo cuando haya erores en la primera
+
+
+  test.yaml
+---
+
+- hosts: gui
+  become:  yes
+
+  tasks:
+  - name: install apache2
+    apt: name=apache2 state=latest
+    when: ansible_os_family == "Debian"
+
+  - name: install httpd
+    yum: name=httpd state=latest
+    when: ansible_os_family == "RedHat"
+
+
+
+
+##############################################################
+  12 - LOOPS
+------------
+
+test.yaml
+---
+
+- hosts:
+  become: yes
+
+  tasks:
+  - name: install stuff
+    apt: name={{ item }} update_cache=yes state=latest # se reemplaza la variable item con la lista de items
+    with_items:
+    - vim
+    - nano
+    - apache2
+
+  - name: show file contents
+    debug: msg={{ item }}
+    with_file:
+    - file1.txt
+    - file2.txt
+
+  - name: show sequence
+    debug: msg= "this is loop {{ item }}"
+    with_sequence: start=1 end=10
+
+
+
+###########################################################
+  13 - TEMPLATES
+--------------
+
+Utiliza Jinja2 y variables para crear plantillas de configuracion
+
+
+test.yaml
+---
+
+- hosts: gui
+  become: yes
+  vars:
+  - file_version: 1.0 # para crear un control de versiones del archivo
+
+  tasks:
+
+  - name: install index
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+      mode: 0777
+
+#
+#index.html.j2
+#<html>
+#<center>
+#<h1>This computer's hostname is {{ ansible_hostname }}</h1>
+#<h3>It is running the {{ ansible_os_family }} family of operating system</h3>
+#<small>This is file version {{ file_version }}
+#{# this will not end up in the final ouput file on the remote server #} # para meter comentarios en las plantillas
+#</center>
+#</html>
+
+
+
+
+
+
+#####################################################
+  12 - VAULT
+-------------
+
+Para encriptar todo el playbook
+
+ansible-vault create test.yaml # para crear el playbook
+ansible-vault edit test.yaml
+ansible-playbook test.yaml --ask-vault-pass # para poder ejecutarlo con la password que hemos usado para encriptarlo
+ansible-playbook test.taml --vault-password-file password.txt # para leer la password de un archivo
+
+
+---
+
+- hosts: localhost
+  become: yes
+  vars:
+  - ansible_sudo_pass: LaPasswordqueSEA
+
+  tasks:
+  - name: install apache
+    apt: name=apache2 state=latest
+
+
+
+#################################################
+  13- INCLUDE STATEMENTS
+---------------------
+Se pueden incluir tareas o plays de otros archivos
+
+
+test.yaml
+---
+
+- include: Desktop/update_systems.yaml # Ejecutara el PLaybook
+
+- hosts: gui
+  become: yes
+  tasks:
+  - include: Desktop/install_apache.yaml # Ejecutara las tareas
+
+
+
+
+  install_apache.yaml (tasks)
+---
+
+- name: install on Debian
+  apt: name=apache2 state=lateest update_cache=yes
+  when: ansible_os_family == "Debian"
+
+- name: install on CentOS
+  yum: name=httpd state=latest update_cache=yes
+  when: ansible_os_family == "RedHat"
+
+- name: start Debian service
+  service: name=apache2 enabled=yes state=started
+  when: ansible_os_family == "Debian"
+
+- name: start RedHat service
+  service: name=httpd enabled=yes state=started
+  when: ansible_os_family == "RedHat"
+
+
+  update_systems.yaml
+---
+
+- hosts: all
+  become: yes
+
+  tasks:
+  - name: update apt
+    apt: upgrade=dist update_cache=yes
+    when: ansible_os_family == "Debian"
+
+  - name: update yum
+    yum: name=* state=latest update_cache=yes
+    when: ansible_os_family == "RedHat"
+
+
+
+#########################################
+  16 - ANSIBLE ROLES
+------------------
+Es la forma standar de organizar lo que se incluye y lo que no en un playbook
+Se invocan en el archivo principal agregando el nombre del directorio
+
+site.yml
+---
+
+- host: gui
+  become: yes
+  roles:
+  - directorio
+
+-------
+site.yml                    # Master Playbook
+webservers.yml              # Playbook for Webserver tier
+dbservers.yml               # Playbook for dbserver Tier
+
+roles/
+common/                  # this hierarchy represents a role
+tasks/
+main.yml           #tasks file can include smallers files
+handlers/
+main.yml
+templates/
+ntp.conf.j2        # templates ends in .j2
+files/
+bat.txt            # file for use with the copy resource
+foo.sh             # script files
+vars/
+main.yml           # variables associated with a role
+defaults/
+main.yml          # default lowe priority variables for this role
+meta/
+main.yml           # role dependenciee
+library/              # roles can also include custom modules
+module_utils/         # roles can also include custom module_utils
+lookup_plugins/       # or other type of plugins like lookup in this case
+
+
+./site.yml
+---
+
+- hosts: gui
+  becpome: yes
+  roles:
+  - apache  # ./roles/apache
+
+
+  ./roles/apache/handlers/main.yml
+---
+
+- name: start debian service
+  service: name=apache2 enabled=yes state=started
+
+- name: start centos service
+  service: name=httpd enabled=yes state=started
+
+
+
+  ./roles/apache/tasks/main.yml
+---
+
+- name: install on debian
+  apt: name=apache2 state=latest update_cache=yes
+  when: ansible_os_family == "Debian"
+  notify: start debian service # handler
+
+- name: install onm CentOS
+  yum: name=httpd state=latest update_cache=yes
+  when: ansible_os_family == "RedHat"
+  notify: start centos service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
