@@ -1,0 +1,6 @@
+---
+
+- hosts: gui
+  become: yes
+  roles:
+     - apache

@@ -5,7 +5,7 @@ ANSIBLE APUNTES
 - Ansible Package fow SO
 
 
-#########################
+  #########################
   SSH ID
 ------------
 - ssh-keygen
@@ -18,7 +18,7 @@ ANSIBLE APUNTES
 - sudo visudo
 
 
-###################################################################
+  ###################################################################
   INVENTORY
 ---------
   /etc/ansible/hosts
@@ -31,7 +31,7 @@ ANSIBLE APUNTES
 
 - o especificar el usuario
   [nogui]
-  host3 ansible_user=administrator
+    host3 ansible_user=administrator
 
 - Crear rangos
   lab[0:4]
@@ -120,19 +120,19 @@ Ejempplos:
 
 
 
-####################################
+  ####################################
   9 - PLAYBOOKS-VARIABLES
 -----------------------
 Las variables se pueden invocar desde el playbook con: {{ }}
 
-  FACTS
-  Son variables especiales que se definen durante la ejecución de un playbook (CPU Type, OS Family, RAM, IP address, etc)
+                                                         FACTS
+                                                         Son variables especiales que se definen durante la ejecución de un playbook (CPU Type, OS Family, RAM, IP address, etc)
 
-  ansible host -m setup # desvuelve las variables disponibles para ese host
-  ansible ubuntu -m setup -a "filter=*family*" # para filtrar
+                                                         ansible host -m setup # desvuelve las variables disponibles para ese host
+                                                         ansible ubuntu -m setup -a "filter=*family*" # para filtrar
 
 
-  test.yaml
+                                                         test.yaml
 ---
 
 - hosts: ubuntu
@@ -146,7 +146,7 @@ Las variables se pueden invocar desde el playbook con: {{ }}
 
 
 
-######################################
+  ######################################
   10 - DEBUG MODULE
 ------------------
 Para no tener que ver el resdultado en la pantalla o crear ficheros en cada host.
@@ -183,7 +183,7 @@ test.taml
 
 
 
-########################################
+  ########################################
   11 - CONDICIONALES
 ------------------
 Se utiliza when en lugar de if
@@ -224,7 +224,7 @@ test.yaml
 
 
 
-##############################################################
+  ##############################################################
   12 - LOOPS
 ------------
 
@@ -254,7 +254,7 @@ test.yaml
 
 
 
-###########################################################
+  ###########################################################
   13 - TEMPLATES
 --------------
 
@@ -277,23 +277,23 @@ test.yaml
       dest: /var/www/html/index.html
       mode: 0777
 
-#
-#index.html.j2
-#<html>
-#<center>
-#<h1>This computer's hostname is {{ ansible_hostname }}</h1>
-#<h3>It is running the {{ ansible_os_family }} family of operating system</h3>
-#<small>This is file version {{ file_version }}
-#{# this will not end up in the final ouput file on the remote server #} # para meter comentarios en las plantillas
-#</center>
-#</html>
+  #
+  #index.html.j2
+  #<html>
+  #<center>
+  #<h1>This computer's hostname is {{ ansible_hostname }}</h1>
+  #<h3>It is running the {{ ansible_os_family }} family of operating system</h3>
+  #<small>This is file version {{ file_version }}
+  #{# this will not end up in the final ouput file on the remote server #} # para meter comentarios en las plantillas
+  #</center>
+  #</html>
 
 
 
 
 
 
-#####################################################
+  #####################################################
   12 - VAULT
 -------------
 
@@ -318,7 +318,7 @@ ansible-playbook test.taml --vault-password-file password.txt # para leer la pas
 
 
 
-#################################################
+  #################################################
   13- INCLUDE STATEMENTS
 ---------------------
 Se pueden incluir tareas o plays de otros archivos
@@ -374,7 +374,7 @@ test.yaml
 
 
 
-#########################################
+  #########################################
   16 - ANSIBLE ROLES
 ------------------
 Es la forma standar de organizar lo que se incluye y lo que no en un playbook

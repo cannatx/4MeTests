@@ -1,0 +1,3 @@
+[gui]
+host1
+host2
