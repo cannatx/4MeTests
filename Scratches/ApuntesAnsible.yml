@@ -17,6 +17,7 @@ ANSIBLE APUNTES
 --------------
 - sudo visudo
 
+administrador ALL=(ALL) NOPASSWD: ALL
 
   ###################################################################
   INVENTORY
@@ -207,7 +208,7 @@ test.yaml
 
 
   test.yaml
----
+--- # Es una manera de hacer lo mismo pero que solo se ejecute cuando ka familia de OS coincida
 
 - hosts: gui
   become:  yes
