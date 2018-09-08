@@ -1,0 +1,10 @@
+---
+
+
+
+- name: start debian service
+  service: name=apache2 enabled=yes state=started
+
+
+- name: start redhat service
+  service: name=httpd enabled=yes state=started

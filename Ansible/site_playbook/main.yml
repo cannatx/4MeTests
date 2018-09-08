@@ -1,0 +1,7 @@
+---
+
+- hosts: clients
+  become: yes
+  roles:
+    - install_service
+    - copy_template

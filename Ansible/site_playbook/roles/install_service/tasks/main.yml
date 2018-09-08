@@ -1,0 +1,16 @@
+---
+
+
+
+- name: install on debian servers
+  apt: name=apache2 state=latest update_cache=yes
+  when: ansible_os_family == "Debian"
+  notify: start debian service
+  #debug: msg= "Instalando en servidores Debian para {{ ansible_host }}"
+
+
+- name: install on redhat servers
+  yum: name=httpd state=latest update_cache=yes
+  when: ansible_os_family == "RedHat"
+  notify: start redhat service
+  #debig: msg= "Instalando en servidores RedHat para {{ ansible_host }}"

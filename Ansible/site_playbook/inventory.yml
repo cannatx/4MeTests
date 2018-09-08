@@ -1,0 +1,9 @@
+[ALL]
+ansible
+ubuntu
+centos
+
+[clients]
+ubuntu ansible_user=administrador
+centos
+
