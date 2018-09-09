@@ -1,0 +1,25 @@
+[ALL]
+ansible
+ubuntu
+centos
+
+[clients]
+ubuntu ansible_user=administrador
+centos
+
+[cudi]
+192.168.0.200
+
+[cuag]
+192.168.0.201
+192.168.0.202
+
+[cuac]
+192.168.0.211
+192.168.0.212
+
+
+[ios]
+cudi
+cuag
+cuac
