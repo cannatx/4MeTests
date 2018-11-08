@@ -1,0 +1,14 @@
+---
+
+  - Config:
+      - mpls label range
+      - mpls ip
+      Interfaces:
+        - mpls ip
+
+  - Checks:
+      - show mpls ldp bindings (ip/local)
+      - show mpls forwarding-table (IP)
+      - show mpls ldp neighborg
+      - show ip cef x.x.x.x detail
+      - show mpls lds discovery detail
