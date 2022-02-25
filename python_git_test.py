@@ -25,7 +25,7 @@ repo.git.checkout(br_name)
 repo.git.add("-A")
 
 repo.git.commit("-m update")
-repo.git.push(f"origin {br_name}")
+# repo.git.push(f"origin {br_name}")
 
 
 repo.remotes.origin.push()
