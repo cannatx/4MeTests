@@ -28,4 +28,5 @@ repo.git.add("-A")
 
 repo.git.commit("-m update")
 
-repo.remotes.origin.push()
+# repo.remotes.origin.push()
+repo.git.push("--set-upstream", "origin", br_name)
