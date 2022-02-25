@@ -29,4 +29,3 @@ repo.git.add("-A")
 repo.git.commit("-m update")
 
 repo.remotes.origin.push()
-pass
