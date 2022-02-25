@@ -7,7 +7,6 @@ repo = git.Repo("./")
 # branches = repo.branches
 # remotes = repo.remotes
 # origin = remotes["origin"]
-# Create Local/ remote
 
 
 # remote_refs = list(repo.remotes['origin'].refs)
