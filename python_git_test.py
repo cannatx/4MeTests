@@ -1,13 +1,30 @@
 import git
 
+br_name = "master"
+
 repo = git.Repo("./")
 
-local_branches = repo.branches
-remotes = repo.remotes
-
+# branches = repo.branches
+# remotes = repo.remotes
+# origin = remotes["origin"]
 # Create Local/ remote
 
-repo.git.checkout("-b", "test_branch_A", "test_branch_A")
+
+# remote_refs = list(repo.remotes['origin'].refs)
+remotes = [r.name for r in repo.remotes.origin.refs]
+if f"origin/{br_name}" not in remotes:
+    repo.git.checkout("-b", br_name, f"origin/{br_name}")
+
+branches = [b.name for b in repo.branches]
+if br_name not in branches:
+    repo.git.checkout("-b", br_name)
 
 
+repo.git.checkout(br_name)
+
+repo.git.add("-A")
+
+repo.git.commit("-m update")
+repo.git.push(f"origin {br_name}")
+repo.remotes.origin.push()
 pass
