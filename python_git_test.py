@@ -26,7 +26,7 @@ try:
     # repo.remotes.origin.push()
     repo.git.push("origin", br_name)
 except Exception as e:
-    if "nothing to commit" in e:
+    if "nothing to commit" in list(e):
         pass
     else:
         print(e)
