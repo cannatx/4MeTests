@@ -1,6 +1,6 @@
 import git
 
-br_name = "master"
+br_name = "A_branch"
 
 repo = git.Repo("./")
 
