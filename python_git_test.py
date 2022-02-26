@@ -4,7 +4,6 @@ br_name = "A_branch"
 
 repo = git.Repo()
 
-# branches = repo.branches
 try:
     repo.git.checkout(br_name)
 except:
