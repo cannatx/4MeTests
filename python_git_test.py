@@ -1,10 +1,9 @@
 import git
 
-br_name = "master"
+br_name = "A_branch"
 
-repo = git.Repo("./")
+repo = git.Repo()
 
-# branches = repo.branches
 try:
     repo.git.checkout(br_name)
 except:
@@ -22,7 +21,7 @@ except:
 
 try:
     repo.git.add("-A")
-    repo.git.commit(f"-m uodate on {br_name}")
+    repo.git.commit(f"-m update on {br_name}")
     # repo.remotes.origin.push()
     repo.git.push("origin", br_name)
 except Exception as e:
@@ -30,3 +29,5 @@ except Exception as e:
         pass
     else:
         print(e)
+
+pass
