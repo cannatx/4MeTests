@@ -1,3 +1,4 @@
+import menu
 from cuaderno import Cuaderno, Nota
 
 
@@ -19,6 +20,9 @@ def main():
     print(f"el contenido de la nota dos es: {c.notas[1].memo}")
     c.modificar_memo(2, "Contenido de la segunda nota modificado")
     print(f"Ahora el contenido de la nota dos es: {c.notas[1].memo}")
+
+    m = menu.Menu()
+    m.run()
 
 
 if __name__ == "__main__":

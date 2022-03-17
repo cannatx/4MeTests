@@ -35,7 +35,7 @@ class Cuaderno:
     def _encontrar_nota(self, nota_id):
         """Devuelve la nota con la correspondiente id"""
         for nota in self.notas:
-            if nota.id == nota_id:
+            if str(nota.id) == str(nota_id):
                 return nota
 
     def nueva_nota(self, memo, tags=""):
@@ -44,11 +44,17 @@ class Cuaderno:
 
     def modificar_memo(self, nota_id, memo):
         """Encuentra la nota de la id correspondiente y cambia su contenido al  valor dado"""
-        self._encontrar_nota(nota_id).memo = memo
+        if nota := self._encontrar_nota(nota_id):
+            nota.memo = memo
+            return True
+        return False
 
     def modificar_tags(self, nota_id, tags):
         """Encuentra la nota por el id pero lo que cambia son los tags"""
-        self._encontrar_nota(nota_id).tags = tags
+        if nota := self._encontrar_nota(nota_id):
+            nota.tags = tags
+            return True
+        return False
 
     def search(self, filter):
         """Enceuntra todas las notas que coincidan con el filtro string dado"""
